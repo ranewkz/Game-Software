@@ -1,0 +1,210 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap');
+
+/* ==========================================================================
+   PURE NATIVE CYBERPUNK AUTHENTICATION STYLES
+   ========================================================================== */
+:root {
+    --bg-color: #030712;
+    --panel-bg: rgba(10, 15, 30, 0.9);
+    --neon-cyan: #00f0ff;
+    --neon-pink: #ff007c;
+    --neon-yellow: #f5f542;
+    --text-primary: #ffffff;
+    --text-muted: #8ba3c7;
+    --border-color: rgba(0, 240, 255, 0.2);
+    --font-cyber: 'Orbitron', 'Rajdhani', sans-serif;
+    --font-ui: 'Rajdhani', sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(0, 240, 255, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(255, 0, 124, 0.05) 0%, transparent 40%);
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 580px;
+    background: var(--panel-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 0 30px rgba(0, 240, 255, 0.15), inset 0 0 15px rgba(0, 240, 255, 0.05);
+    padding: 40px;
+    backdrop-filter: blur(8px);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.auth-header h1 {
+    font-family: var(--font-cyber);
+    font-size: 2.2rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    margin-bottom: 5px;
+}
+
+.auth-header p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+/* Custom Grid Layout (No Frameworks) */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: end; /* Level-aligns fields with wrapping labels */
+}
+
+.full-width {
+    grid-column: span 2;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-family: var(--font-cyber);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--neon-cyan);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+    text-shadow: 0 0 5px rgba(0, 240, 255, 0.2);
+}
+
+input, select {
+    background-color: rgba(3, 7, 18, 0.8);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 12px 16px;
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    outline: none;
+    transition: all 0.25s ease;
+}
+
+input:focus, select:focus {
+    border-color: var(--neon-pink);
+    box-shadow: 0 0 10px rgba(255, 0, 124, 0.4);
+    background-color: rgba(5, 10, 25, 0.9);
+}
+
+select option {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+}
+
+.btn-submit {
+    font-family: var(--font-cyber);
+    background: linear-gradient(90deg, #ff007c 0%, #a800ff 100%);
+    border: none;
+    border-radius: 6px;
+    color: var(--text-primary);
+    padding: 14px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 0, 124, 0.4);
+    width: 100%;
+    margin-top: 15px;
+}
+
+.btn-submit:hover {
+    background: linear-gradient(90deg, #00f0ff 0%, #ff007c 100%);
+    box-shadow: 0 4px 20px rgba(0, 240, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.btn-submit:active {
+    transform: translateY(0);
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+}
+
+.auth-footer a {
+    color: var(--neon-cyan);
+    text-decoration: none;
+    font-weight: 700;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    font-family: var(--font-cyber);
+    font-size: 0.85rem;
+    margin-left: 5px;
+}
+
+.auth-footer a:hover {
+    color: var(--neon-pink);
+    text-shadow: 0 0 8px rgba(255, 0, 124, 0.6);
+}
+
+/* Custom Error Alert Styles */
+.alert-danger {
+    background-color: rgba(220, 38, 38, 0.15);
+    border: 1px solid rgba(220, 38, 38, 0.5);
+    color: #fca5a5;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+    text-align: center;
+    font-family: var(--font-ui);
+    box-shadow: 0 0 10px rgba(220, 38, 38, 0.1);
+}
+
+@media (max-width: 600px) {
+    .auth-container {
+        padding: 25px;
+    }
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    .form-grid > div {
+        grid-column: span 2;
+    }
+}
