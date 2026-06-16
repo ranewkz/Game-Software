@@ -18,3 +18,10 @@ Route::get('/dashboard', [AuthController::class, 'customerDashboard'])->name('cu
 
 Route::get('/items/create', [GameController::class, 'create'])->name('items.create');
 Route::post('/items', [GameController::class, 'store'])->name('items.store');
+
+Route::get('/admin-dashboard', function () {
+    return view('admin_view.dashboard');
+});
+
+use App\Http\Controllers\DashboardController;
+Route::get('/admin-dashboard', [DashboardController::class, 'index']);
