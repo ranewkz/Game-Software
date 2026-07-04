@@ -45,7 +45,6 @@ class GameController extends Controller
             'status' => 'required|string',
         ]);
 
-        // Insert the data into the 'item' table exactly matching your ERD column fields
         DB::table('item')->insert([
             'type_id' => $request->type_id,
             'name' => $request->name,

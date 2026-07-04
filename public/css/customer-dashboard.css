@@ -1,6 +1,3 @@
-/* ==========================================================================
-   STEAM CYBERPUNK CUSTOMER STOREFRONT STYLES (100% PURE NATIVE CSS)
-   ========================================================================== */
 
 :root {
     --bg-deep: #07090e;
@@ -21,9 +18,7 @@
     --transition-speed: 0.3s;
 }
 
-/* ==========================================================================
-   Base Document Resets & Structure
-   ========================================================================== */
+
 * {
     margin: 0;
     padding: 0;
@@ -42,9 +37,7 @@ body {
         radial-gradient(circle at 90% 80%, rgba(255, 0, 124, 0.04) 0%, transparent 50%);
 }
 
-/* ==========================================================================
-   Navigation Terminal Bar
-   ========================================================================== */
+
 .steam-nav {
     display: flex;
     justify-content: space-between;
@@ -104,7 +97,6 @@ body {
     gap: 20px;
 }
 
-/* Shopping Cart Trigger Container */
 .cart-trigger-container {
     display: flex;
     align-items: center;

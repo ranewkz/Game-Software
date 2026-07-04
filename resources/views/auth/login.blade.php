@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LOGIN // ACCESS PORTAL</title>
     <link rel="stylesheet" href="{{ asset('css/gamer-auth.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -14,9 +15,19 @@
             <p>ENTER CREDENTIALS TO LOG IN</p>
         </div>
 
-        @if($errors->has('login_error'))
-            <div class="alert-danger">
-                {{ $errors->first('login_error') }}
+        @if($errors->any())
+            <div class="alert-danger" style="background: rgba(255, 0, 85, 0.1); border: 1px solid #ff0055; color: #ff0055; padding: 15px; margin-bottom: 20px; font-family: 'Share Tech Mono', monospace; text-align: left;">
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    @foreach($errors->all() as $error)
+                        <li>// SYSTEM ERROR: {{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        @if(session('success'))
+            <div class="alert-success" style="background: rgba(0, 240, 255, 0.1); border: 1px solid #00f0ff; color: #00f0ff; padding: 15px; margin-bottom: 20px; font-family: 'Share Tech Mono', monospace; text-align: left;">
+                // SUCCESS: {{ session('success') }}
             </div>
         @endif
 
@@ -26,7 +37,7 @@
             <div class="form-grid">
                 <div class="form-group full-width">
                     <label for="email">USER EMAIL</label>
-                    <input type="email" id="email" name="email" required autocomplete="email">
+                    <input type="email" id="email" name="email" value="{{ old('email') }}" required autocomplete="email">
                 </div>
 
                 <div class="form-group full-width">

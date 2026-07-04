@@ -14,12 +14,16 @@ return new class extends Migration
         Schema::create('games', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->string('slug')->unique(); // Example: 'cyberpunk-2077' for clean URLs
+            $table->string('genre');
+            $table->string('platform');
+            $table->decimal('price', 8, 2);
+            $table->string('image')->nullable();
+            $table->string('rating');
+            $table->string('status');
+            $table->integer('stock')->default(0);
+            $table->boolean('supports_physical')->default(false);
             $table->text('description')->nullable();
-            $table->decimal('price', 8, 2)->default(0.00); // Supports prices up to 999,999.99
-            $table->string('download_url')->nullable(); // Where the game file (.zip/.exe) is stored
-            $table->string('cover_image')->nullable(); // To display a cool thumbnail on the store
-            $table->timestamps(); // Generates created_at and updated_at automatically
+            $table->timestamps();
         });
     }
 

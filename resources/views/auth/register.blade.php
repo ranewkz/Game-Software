@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>REGISTER // ACCESS PORTAL</title>
+    <title>REGISTER // DEPLOY PROFILE</title>
     <link rel="stylesheet" href="{{ asset('css/gamer-auth.css') }}">
 </head>
 <body>
@@ -11,7 +11,7 @@
     <div class="auth-container">
         <div class="auth-header">
             <h1>DEPLOY SYSTEM ACCOUNT</h1>
-            <p>CREATE YOUR PLAYER PROFILE IDENTIFICATION</p>
+            <p>CREATE YOUR SYSTEM ACCESS IDENTIFICATION</p>
         </div>
 
         @if($errors->any())
@@ -24,38 +24,47 @@
             @csrf
 
             <div class="form-grid">
+                <!-- THIS IS THE FIELD THAT WAS MISSING -->
+                <div class="form-group full-width">
+                    <label for="role_type">SELECT SYSTEM PROFILE ROLE</label>
+                    <select id="role_type" name="role_type" required>
+                        <option value="customer">CUSTOMER ACCESS (STASH & ORDER MANAGER)</option>
+                        <option value="staff">STAFF RECRUIT (ENTERPRISE ADMIN MANAGEMENT)</option>
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <label for="name">FULL OPERATIONAL NAME</label>
-                    <input type="text" id="name" name="name" value="{{ old('name') }}" required autocomplete="name">
+                    <input type="text" id="name" name="name" required autocomplete="name">
                 </div>
 
                 <div class="form-group">
                     <label for="email">SECURE EMAIL ADDRESS</label>
-                    <input type="email" id="email" name="email" value="{{ old('email') }}" required autocomplete="email">
+                    <input type="email" id="email" name="email" required autocomplete="email">
                 </div>
 
                 <div class="form-group">
                     <label for="phone">CONTACT TELEPHONY NUMBER</label>
-                    <input type="text" id="phone" name="phone" value="{{ old('phone') }}" required autocomplete="tel">
+                    <input type="text" id="phone" name="phone" required autocomplete="tel">
                 </div>
 
                 <div class="form-group">
                     <label for="gender">GENDER PROFILE IDENTITY</label>
                     <select id="gender" name="gender" required>
-                        <option value="Male" {{ old('gender') == 'Male' ? 'selected' : '' }}>MALE</option>
-                        <option value="Female" {{ old('gender') == 'Female' ? 'selected' : '' }}>FEMALE</option>
-                        <option value="Other" {{ old('gender') == 'Other' ? 'selected' : '' }}>OTHER</option>
+                        <option value="Male">MALE</option>
+                        <option value="Female">FEMALE</option>
+                        <option value="Other">OTHER</option>
                     </select>
                 </div>
 
                 <div class="form-group full-width">
                     <label for="address">PHYSICAL CARGO ROUTING ADDRESS</label>
-                    <input type="text" id="address" name="address" value="{{ old('address') }}" required autocomplete="street-address">
+                    <input type="text" id="address" name="address" required autocomplete="street-address">
                 </div>
 
                 <div class="form-group full-width">
                     <label for="dob">DATE OF NATALITY (DOB)</label>
-                    <input type="date" id="dob" name="dob" value="{{ old('dob') }}" required>
+                    <input type="date" id="dob" name="dob" required>
                 </div>
 
                 <div class="form-group">
