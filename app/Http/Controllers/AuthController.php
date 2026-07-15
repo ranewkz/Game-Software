@@ -9,200 +9,196 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // ==========================================
-    // 1. AUTHENTICATION (LOGIN, REGISTER, LOGOUT)
-    // ==========================================
-
-    public function showLogin()
-    {
-        return view('auth.login');
-    }
+    public function showLogin() { return view('auth.login'); }
 
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
-        ]);
-
-        // Try to find user in 'staff' table first
+        $request->validate(['email' => 'required|email', 'password' => 'required']);
         $user = DB::table('staff')->where('email', $request->email)->first();
         $roleName = 'admin';
-
-        // If not in 'staff', try 'customer' table
         if (!$user) {
             $user = DB::table('customer')->where('email', $request->email)->first();
             $roleName = 'customer';
         }
-
-        // Verify password
         if ($user && Hash::check($request->password, $user->password)) {
-            Session::put([
-                'user_id'    => $user->id,
-                'user_name'  => $user->name,
-                'user_email' => $user->email,
-                'user_role'  => $roleName
-            ]);
-
-            return ($roleName === 'admin') 
-                ? redirect()->route('admin.dashboard') 
-                : redirect()->route('customer.dashboard');
+            Session::put(['user_id' => $user->id, 'user_name' => $user->name, 'user_email' => $user->email, 'user_role' => $roleName]);
+            return ($roleName === 'admin') ? redirect()->route('admin.dashboard') : redirect()->route('customer.dashboard');
         }
-
-        return back()->withErrors(['login_error' => 'Invalid comm-link credentials provided.']);
+        return back()->withErrors(['login_error' => 'Invalid credentials.']);
     }
 
-    public function showRegister()
-    {
-        return view('auth.register');
-    }
+    public function showRegister() { return view('auth.register'); }
 
     public function register(Request $request)
     {
         $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:customer,email',
-            'password' => 'required|min:6|confirmed',
-            'phone'    => 'required|string',
-            'gender'   => 'required|string',
-            'address'  => 'required|string',
-            'dob'      => 'required|date',
-            'role_type'=> 'required|string'
+            'name' => 'required|string|max:255', 'email' => 'required|email|unique:customer,email',
+            'password' => 'required|min:6|confirmed', 'phone' => 'required|string',
+            'gender' => 'required|string', 'address' => 'required|string',
+            'dob' => 'required|date', 'role_type' => 'required|string'
         ]);
-
         $roleId = ($request->role_type === 'staff') ? 1 : 2;
-
         DB::table('customer')->insert([
-            'name'       => $request->name,
-            'email'      => $request->email,
-            'password'   => Hash::make($request->password),
-            'role_id'    => $roleId,
-            'phone'      => $request->phone,
-            'gender'     => $request->gender,
-            'address'    => $request->address,
-            'dob'        => $request->dob,
-            'status'     => 'active',
-            'created_at' => now(),
-            'updated_at' => now()
+            'name' => $request->name, 'email' => $request->email, 'password' => Hash::make($request->password),
+            'role_id' => $roleId, 'phone' => $request->phone, 'gender' => $request->gender,
+            'address' => $request->address, 'dob' => $request->dob, 'status' => 'active',
+            'created_at' => now(), 'updated_at' => now()
         ]);
-
-        return redirect()->route('login')->with('success', 'Operative profile deployed. Please login.');
+        return redirect()->route('login')->with('success', 'Profile deployed.');
     }
 
-    public function logout()
-    {
-        Session::flush();
-        return redirect()->route('login');
-    }
-
-    // ==========================================
-    // 2. CUSTOMER DASHBOARD, PROFILE, ORDERS
-    // ==========================================
+    public function logout() { Session::flush(); return redirect()->route('login'); }
 
     public function customerDashboard()
     {
         if (!Session::has('user_id')) return redirect()->route('login');
+        $games = DB::table('games')->get()->map(fn($g) => (array)$g)->toArray();
+        $featuredGames = array_slice($games, 0, 4);
+        $physicalGames = array_filter($games, fn($g) => isset($g['supports_physical']) && $g['supports_physical'] == 1);
+        $userCredits = DB::table('customer')->where('id', Session::get('user_id'))->value('credits') ?? 0;
+        return view('customer_view.dashboard', compact('games', 'featuredGames', 'physicalGames', 'userCredits'));
+    }
 
-        $banners = DB::table('banners')->orderBy('created_at', 'desc')->get();
-        $games   = DB::table('games')->get()->map(fn($g) => (array)$g)->toArray();
-        
-        $physicalGames = array_filter($games, function($game) {
-            return isset($game['supports_physical']) && $game['supports_physical'] == 1;
-        });
-
-        return view('customer_view.dashboard', compact('games', 'physicalGames', 'banners'));
+    public function catalog()
+    {
+        if (!Session::has('user_id')) return redirect()->route('login');
+        $games = DB::table('games')->get()->map(fn($g) => (array)$g)->toArray();
+        $userCredits = DB::table('customer')->where('id', Session::get('user_id'))->value('credits') ?? 0;
+        return view('customer_view.catalog', compact('games', 'userCredits'));
     }
 
     public function showProfile()
     {
         if (!Session::has('user_id')) return redirect()->route('login');
-        
         $user = DB::table('customer')->where('id', Session::get('user_id'))->first();
-        return view('customer_view.profile', compact('user'));
+        $userCredits = $user->credits ?? 0;
+        return view('customer_view.profile', compact('user', 'userCredits'));
     }
 
     public function updateProfile(Request $request)
     {
         if (!Session::has('user_id')) return redirect()->route('login');
-
-        $request->validate([
-            'name'     => 'required|string|max:255',
-            'password' => 'nullable|min:6|confirmed'
-        ]);
-
+        $request->validate(['name' => 'required|string|max:255', 'password' => 'nullable|min:6|confirmed']);
         $updateData = ['name' => $request->name];
-
-        if ($request->filled('password')) {
-            $updateData['password'] = Hash::make($request->password);
-        }
-
+        if ($request->filled('password')) $updateData['password'] = Hash::make($request->password);
         DB::table('customer')->where('id', Session::get('user_id'))->update($updateData);
         Session::put('user_name', $request->name);
+        return back();
+    }
 
-        return back()->with('success', 'Profile override successful.');
+    public function checkoutPage()
+    {
+        if (!Session::has('user_id')) return redirect()->route('login');
+        $user = DB::table('customer')->where('id', Session::get('user_id'))->first();
+        $userCredits = $user->credits ?? 0;
+        return view('customer_view.checkout', compact('user', 'userCredits'));
+    }
+
+    public function checkout(Request $request)
+    {
+        $request->validate([
+            'cart' => 'required|array',
+            'address' => 'required|string',
+            'stripeToken' => 'required|string'
+        ]);
+        try {
+            \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+
+            $subtotal = 0;
+            $freight = 0;
+            $purchasedItems = [];
+            
+            foreach ($request->cart as $item) {
+                $subtotal += ($item['price'] * $item['qty']);
+                
+                if (isset($item['format']) && $item['format'] === 'physical') {
+                    $freight += (12 * $item['qty']);
+                    $purchasedItems[] = [
+                        'title' => $item['title'],
+                        'qty' => $item['qty'],
+                        'key' => 'PHYSICAL_DELIVERY_PENDING'
+                    ];
+                } else {
+                    $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                    $generatedKey = substr(str_shuffle($chars), 0, 4) . '-' . substr(str_shuffle($chars), 0, 4) . '-' . substr(str_shuffle($chars), 0, 4);
+                    
+                    $purchasedItems[] = [
+                        'title' => $item['title'],
+                        'qty' => $item['qty'],
+                        'key' => $generatedKey
+                    ];
+                }
+            }
+            
+            $totalAmount = $subtotal + $freight;
+            
+            \Stripe\Charge::create([
+                'amount' => $totalAmount * 100,
+                'currency' => 'usd',
+                'source' => $request->stripeToken,
+                'description' => 'Steam Client Purchase',
+            ]);
+            
+            $orderId = 'STM-' . rand(10000, 99990);
+            
+            DB::table('orders')->insert([
+                'customer_id' => Session::get('user_id'),
+                'payment_gateway' => 'Stripe Secure Uplink',
+                'cargo_pathway' => $request->address,
+                'total_charged' => $totalAmount,
+                'status' => 'pending',
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'order_id' => $orderId,
+                'date' => now()->toDateTimeString(),
+                'items' => $purchasedItems
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function myOrders()
     {
-        if (!Session::has('user_id')) return redirect()->route('login');
-        
-        // Wrap the database call in a try/catch block.
-        // If the 'orders' table is missing, it won't crash the server.
-        try {
-            $orders = DB::table('orders')
-                ->where('customer_id', Session::get('user_id'))
-                ->orderBy('created_at', 'desc')
-                ->get();
-        } catch (\Illuminate\Database\QueryException $e) {
-            // Table doesn't exist yet, return an empty collection
-            $orders = collect([]); 
-        }
-            
-        return view('customer_view.orders', compact('orders'));
+        $orders = DB::table('orders')
+            ->where('customer_id', Session::get('user_id'))
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $user = DB::table('customer')->where('id', Session::get('user_id'))->first();
+
+        return view('customer_view.orders', [
+            'orders' => $orders,
+            'userCredits' => $user ? $user->credits : 0
+        ]);
     }
 
-    // ==========================================
-    // 3. ADMIN DASHBOARD & CMS
-    // ==========================================
+    public function toggleWishlist(Request $request)
+    {
+        $userId = Session::get('user_id');
+        $gameId = $request->input('game_id');
+        $exists = DB::table('wishlist')->where('customer_id', $userId)->where('game_id', $gameId)->first();
+        if ($exists) { 
+            DB::table('wishlist')->where('id', $exists->id)->delete(); 
+            return response()->json(['status' => 'removed']);
+        }
+        DB::table('wishlist')->insert(['customer_id' => $userId, 'game_id' => $gameId]);
+        return response()->json(['status' => 'added']);
+    }
+
+    public function getWishlist()
+    {
+        return response()->json(DB::table('wishlist')->where('customer_id', Session::get('user_id'))->pluck('game_id'));
+    }
 
     public function adminDashboard()
-    {
-        if (Session::get('user_role') !== 'admin') return redirect()->route('login');
-
-        // Joined with role table to prevent "Undefined property: role" errors
-        $users = DB::table('customer')
-            ->leftJoin('role', 'customer.role_id', '=', 'role.id')
-            ->select('customer.*', 'role.name as role')
-            ->get();
-
-        $games   = DB::table('games')->get();
-        $banners = DB::table('banners')->orderBy('created_at', 'desc')->get();
-
-        return view('admin_view.dashboard', compact('users', 'games', 'banners'));
-    }
-
-    public function storeBanner(Request $request)
-    {
-        $request->validate([
-            'banner_image' => 'required|image|max:5120',
-            'title'        => 'required|string'
-        ]);
-
-        $imageName = time() . '.' . $request->banner_image->extension();
-        $request->banner_image->move(public_path('assets/images/banners'), $imageName);
-
-        DB::table('banners')->insert([
-            'image' => $imageName,
-            'title' => $request->title,
-            'created_at' => now()
-        ]);
-
-        return back()->with('success', 'Banner deployed.');
-    }
-
-    public function destroyBanner($id)
-    {
-        DB::table('banners')->where('id', $id)->delete();
-        return back()->with('success', 'Banner purged.');
-    }
+{
+    return view('admin_view.dashboard');
+}
 }

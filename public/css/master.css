@@ -1,0 +1,129 @@
+:root {
+    --bg-dark: #020a14;
+    --cyan: #00f0ff;
+    --magenta: #ff003c;
+    --border-dim: rgba(0, 240, 255, 0.2);
+    --font-main: 'Orbitron', sans-serif;
+    --font-text: 'Rajdhani', sans-serif;
+}
+body {
+    background-color: var(--bg-dark);
+    color: white;
+    font-family: var(--font-text);
+    margin: 0;
+    padding: 0;
+}
+.top-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 40px;
+    background: rgba(0, 0, 0, 0.8);
+    border-bottom: 1px solid var(--cyan);
+}
+.nav-brand {
+    font-family: var(--font-main);
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+.logo-accent {
+    color: var(--cyan);
+}
+.nav-links {
+    display: flex;
+    gap: 30px;
+}
+.nav-links a {
+    color: #8090a6;
+    text-decoration: none;
+    font-family: var(--font-main);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: 0.3s;
+}
+.nav-links a:hover {
+    color: white;
+}
+.nav-user-area {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.nav-icon-btn {
+    background: transparent;
+    border: 1px solid var(--border-dim);
+    color: #8090a6;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    font-family: var(--font-text);
+    font-weight: 600;
+}
+.nav-icon-btn:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+}
+.nav-badge {
+    background: var(--magenta);
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    font-family: var(--font-main);
+}
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 10px;
+}
+.user-avatar-small {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, var(--cyan), var(--magenta));
+}
+.user-details {
+    display: flex;
+    flex-direction: column;
+}
+.user-details .name {
+    font-family: var(--font-main);
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+.user-details .credits {
+    font-size: 0.75rem;
+    color: var(--cyan);
+    font-weight: 600;
+}
+.btn-logout {
+    border: 1px solid var(--magenta);
+    color: var(--magenta);
+    background: transparent;
+    padding: 6px 15px;
+    text-decoration: none;
+    font-family: var(--font-main);
+    font-size: 0.75rem;
+    border-radius: 4px;
+    transition: 0.3s;
+}
+.btn-logout:hover {
+    background: var(--magenta);
+    color: white;
+}
+.main-content {
+    padding: 50px;
+    max-width: 1400px;
+    margin: auto;
+}

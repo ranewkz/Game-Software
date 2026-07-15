@@ -15,13 +15,21 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout'); 
 
-// --- CUSTOMER DASHBOARD ---
+// --- CUSTOMER DASHBOARD & PROFILE ---
 Route::get('/dashboard', [AuthController::class, 'customerDashboard'])->name('customer.dashboard');
+Route::get('/catalog', [AuthController::class, 'catalog'])->name('customer.catalog');
+Route::get('/profile', [AuthController::class, 'showProfile'])->name('profile');
+Route::post('/profile/update', [AuthController::class, 'updateProfile'])->name('profile.update');
+Route::get('/my-orders', [AuthController::class, 'myOrders'])->name('my.orders');
+
+// --- SECURE CHECKOUT & WISHLIST ---
+Route::get('/checkout', [AuthController::class, 'checkoutPage'])->name('checkout');
+Route::post('/checkout', [AuthController::class, 'checkout'])->name('checkout.process');
+Route::post('/wishlist/toggle', [AuthController::class, 'toggleWishlist'])->name('wishlist.toggle');
+Route::get('/wishlist/get', [AuthController::class, 'getWishlist'])->name('wishlist.get');
 
 // --- ADMIN DASHBOARD & CRUD ROUTES ---
 Route::prefix('admin')->group(function () {
-    
-    // FIXED: Pointing this to the AuthController where we wrote all the new code!
     Route::get('/dashboard', [AuthController::class, 'adminDashboard'])->name('admin.dashboard');
     
     Route::get('/games/create', [DashboardController::class, 'create'])->name('admin.games.create');
@@ -36,18 +44,11 @@ Route::prefix('admin')->group(function () {
     // --- THE ROLE OVERRIDE ROUTE ---
     Route::post('/users/update-role/{type}/{id}', [DashboardController::class, 'updateRole'])->name('admin.users.update_role');
 
-    // --- NEW: DYNAMIC BANNER ROUTES ---
+    // --- DYNAMIC BANNER ROUTES ---
     Route::post('/banners/store', [AuthController::class, 'storeBanner'])->name('admin.banners.store');
-    
-    // FIXED: Removed the duplicate at the bottom and properly formatted this one
     Route::delete('/banners/destroy/{id}', [AuthController::class, 'destroyBanner'])->name('admin.banners.destroy');
 });
 
 // --- MISC ITEMS ---
 Route::get('/items/create', [GameController::class, 'create'])->name('items.create');
 Route::post('/items', [GameController::class, 'store'])->name('items.store');
-
-
-Route::get('/profile', [App\Http\Controllers\AuthController::class, 'showProfile'])->name('profile');
-Route::get('/my-orders', [App\Http\Controllers\AuthController::class, 'myOrders'])->name('my.orders');
-Route::post('/profile/update', [App\Http\Controllers\AuthController::class, 'updateProfile'])->name('profile.update');
