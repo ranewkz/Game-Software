@@ -23,6 +23,8 @@ card.on('change', function(event) {
 let cartData = JSON.parse(localStorage.getItem('steam_cart')) || [];
 let cyberMap = null;
 let cyberMarker = null;
+let currentDiscount = 0;
+let appliedPromoCode = "";
 
 document.addEventListener('DOMContentLoaded', () => {
     let totalItems = 0;
@@ -40,6 +42,83 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
     renderCheckoutItems();
+});
+
+document.getElementById('btnApplyPromo').addEventListener('click', async function() {
+    const button = this;
+    const input = document.getElementById('promoCodeInput');
+    const msg = document.getElementById('promoMessage');
+    const row = document.getElementById('discountRow');
+    const summaryDiscount = document.getElementById('summaryDiscount');
+
+    if (button.innerText === 'REMOVE') {
+        currentDiscount = 0;
+        appliedPromoCode = "";
+        input.value = "";
+        input.disabled = false;
+        input.style.borderColor = "rgba(0, 240, 255, 0.2)";
+        msg.innerText = "";
+        row.style.display = 'none';
+        button.innerText = 'APPLY';
+        button.style.borderColor = '#00f0ff';
+        button.style.color = '#00f0ff';
+        renderCheckoutItems();
+        return;
+    }
+
+    const codeValue = input.value.trim().toUpperCase();
+    if (!codeValue) return;
+
+    button.disabled = true;
+    button.innerText = "VERIFYING...";
+    input.disabled = true;
+
+    await new Promise(resolve => setTimeout(resolve, 600));
+
+    try {
+        const response = await fetch(window.checkPromoUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
+            },
+            body: JSON.stringify({ code: codeValue })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            currentDiscount = parseFloat(data.discount_amount);
+            appliedPromoCode = codeValue;
+            
+            msg.style.color = '#00f0ff';
+            msg.innerText = `PROMO ACCEPTED: $${currentDiscount.toFixed(2)} DEDUCTED`;
+            input.style.borderColor = '#00f0ff';
+            
+            row.style.display = 'flex';
+            summaryDiscount.innerText = `-$${currentDiscount.toFixed(2)}`;
+            
+            button.innerText = 'REMOVE';
+            button.style.borderColor = '#ff0055';
+            button.style.color = '#ff0055';
+        } else {
+            currentDiscount = 0;
+            appliedPromoCode = "";
+            msg.style.color = '#ff0055';
+            msg.innerText = data.message || 'INVALID SYSTEM CODE';
+            input.style.borderColor = '#ff0055';
+            input.disabled = false;
+            button.innerText = 'APPLY';
+        }
+    } catch (err) {
+        msg.style.color = '#ff0055';
+        msg.innerText = 'UPLINK ERROR SECURING VALIDATION.';
+        input.disabled = false;
+        button.innerText = 'APPLY';
+    } finally {
+        button.disabled = false;
+        renderCheckoutItems();
+    }
 });
 
 function renderCheckoutItems() {
@@ -69,7 +148,9 @@ function renderCheckoutItems() {
     });
 
     list.innerHTML = html;
-    const grandTotal = subtotal + freight;
+    let grandTotal = subtotal + freight - currentDiscount;
+    if (grandTotal < 0) grandTotal = 0;
+
     document.getElementById('summarySubtotal').innerText = '$' + subtotal.toFixed(2);
     document.getElementById('summaryFreight').innerText = '$' + freight.toFixed(2);
     document.getElementById('summaryTotal').innerText = '$' + grandTotal.toFixed(2);
@@ -159,7 +240,8 @@ document.getElementById('processCheckoutForm').addEventListener('submit', async 
             body: JSON.stringify({ 
                 cart: cartData, 
                 address: finalAddress,
-                stripeToken: token.id 
+                stripeToken: token.id,
+                promoCode: appliedPromoCode
             })
         });
 
@@ -170,7 +252,7 @@ document.getElementById('processCheckoutForm').addEventListener('submit', async 
             btn.style.borderColor = "#00ff00";
             btn.style.color = "#00ff00";
             btn.innerText = "TRANSACTION APPROVED!";
-            buildAndShowReceipt(data.items, finalAddress, data.order_id, data.date, cartData);
+            buildAndShowReceipt(data.items, finalAddress, data.order_id, data.date, cartData, currentDiscount);
         } else {
             alert('TRANSACTION FAILED: ' + (data.error || 'System Error'));
             btn.disabled = false;
@@ -183,7 +265,7 @@ document.getElementById('processCheckoutForm').addEventListener('submit', async 
     }
 });
 
-function buildAndShowReceipt(serverItems, address, orderId, date, localCart) {
+function buildAndShowReceipt(serverItems, address, orderId, date, localCart, appliedDiscount) {
     document.getElementById('rec-id').innerText = orderId;
     document.getElementById('rec-date').innerText = date;
     document.getElementById('rec-address').innerText = address;
@@ -203,9 +285,12 @@ function buildAndShowReceipt(serverItems, address, orderId, date, localCart) {
         if(item.format === 'physical') fr += (12 * item.qty);
     });
     
+    let finalDebit = sub + fr - appliedDiscount;
+    if (finalDebit < 0) finalDebit = 0;
+
     document.getElementById('rec-sub').innerText = '$' + sub.toFixed(2);
     document.getElementById('rec-freight').innerText = '$' + fr.toFixed(2);
-    document.getElementById('rec-total').innerText = '$' + (sub + fr).toFixed(2);
+    document.getElementById('rec-total').innerText = '$' + finalDebit.toFixed(2);
     
     document.getElementById('fullReceiptModal').style.display = 'flex';
 }

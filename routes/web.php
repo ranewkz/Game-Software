@@ -52,3 +52,7 @@ Route::prefix('admin')->group(function () {
 // --- MISC ITEMS ---
 Route::get('/items/create', [GameController::class, 'create'])->name('items.create');
 Route::post('/items', [GameController::class, 'store'])->name('items.store');
+
+// --- PROMO CODES ROUTES ---
+Route::post('/admin/promos', [AuthController::class, 'storePromo'])->name('admin.promos.store');
+Route::post('/checkout/check-promo', [AuthController::class, 'checkPromo'])->name('checkout.check-promo');

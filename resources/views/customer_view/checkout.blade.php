@@ -23,10 +23,19 @@
                         </select>
                     </div>
                     
-                    <div class="form-group" id="newAddressGroup" style="display: none;">
+                    <div class="form-group" id="newAddressGroup" style="display: none; margin-top: 15px;">
                         <label>SELECT SATELLITE DROP ZONE (CLICK MAP TO PIN)</label>
                         <input type="text" id="newAddressInput" class="cyber-input" style="width: 100%; margin-bottom: 10px;" placeholder="Click on the map to set delivery zone..." readonly>
-                        <div id="cyberMap"></div>
+                        <div id="cyberMap" style="height: 300px; width: 100%; border: 1px solid #00f0ff; border-radius: 4px; z-index: 1;"></div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label>PROMOTIONAL OVERRIDE CODE</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="promoCodeInput" class="cyber-input" style="flex: 1; text-transform: uppercase;" placeholder="ENTER CODE...">
+                            <button type="button" id="btnApplyPromo" style="background: transparent; border: 1px solid #00f0ff; color: #00f0ff; padding: 0 20px; font-family: 'Share Tech Mono', monospace; font-weight: 600; cursor: pointer; border-radius: 4px;">APPLY</button>
+                        </div>
+                        <div id="promoMessage" style="font-size: 0.85rem; margin-top: 8px; font-weight: 600; font-family: 'Share Tech Mono', monospace;"></div>
                     </div>
 
                     <div class="form-group" style="margin-top: 20px; margin-bottom: 20px;">
@@ -37,6 +46,7 @@
                     <div class="receipt-box">
                         <div class="receipt-line"><span>SUBTOTAL</span><span id="summarySubtotal">$0.00</span></div>
                         <div class="receipt-line"><span>FREIGHT LOGISTICS</span><span id="summaryFreight">$0.00</span></div>
+                        <div class="receipt-line" id="discountRow" style="display: none; color: #ff0055;"><span>PROMO DISCOUNT</span><span id="summaryDiscount">-$0.00</span></div>
                         <div class="receipt-line total"><span>TOTAL DEBIT</span><span id="summaryTotal">$0.00</span></div>
                     </div>
                     <button type="submit" id="btnSubmitCheckout" class="btn-authorize">AUTHORIZE TRANSACTION</button>
@@ -87,6 +97,7 @@
         window.stripeKey = "{{ env('STRIPE_KEY') }}";
         window.checkoutProcessUrl = "{{ route('checkout.process') }}";
         window.myOrdersUrl = "{{ route('my.orders') }}";
+        window.checkPromoUrl = "{{ route('checkout.check-promo') }}";
     </script>
     <script src="{{ asset('js/checkout.js') }}?v={{ time() }}"></script>
 @endsection

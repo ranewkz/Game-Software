@@ -12,7 +12,6 @@
         .platform-badge { background: rgba(255, 255, 255, 0.1); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; color: #fff; }
         .stock-green { background: #00cc66; color: #000; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; font-family: 'Share Tech Mono', monospace; }
         .stock-yellow { background: #ffb703; color: #000; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; font-family: 'Share Tech Mono', monospace; }
-        
         .tab-content { display: none; }
         .tab-content.active { display: block; }
     </style>
@@ -42,6 +41,7 @@
                 <li class="nav-item" onclick="switchTab('users')">USER MATRIX</li>
                 <li class="nav-item" onclick="switchTab('vault')">GAME VAULT</li>
                 <li class="nav-item" onclick="switchTab('campaigns')">CAMPAIGNS & BANNERS</li>
+                <li class="nav-item" onclick="switchTab('promos')">PROMO MANAGEMENT</li>
             </ul>
         </aside>
 
@@ -60,7 +60,7 @@
 
             @if (session('success'))
                 <div style="background: rgba(0,240,255,0.1); border: 1px solid var(--neon-cyan); padding: 15px; margin-bottom: 20px; border-radius: 4px;">
-                    <strong style="color: var(--neon-cyan); font-family: var(--font-heading);">// SYSTEM UPDATE:</strong> 
+                    <strong style="color: var(--neon-cyan); font-family: var(--font-heading);">// SYSTEM UPDATE:</strong>
                     <span style="color: #fff; font-size: 0.9rem;">{{ session('success') }}</span>
                 </div>
             @endif
@@ -305,6 +305,77 @@
                             <p class="empty-state-desc">The storefront slider is currently inactive. Upload and deploy a banner above to populate the feed.</p>
                         </div>
                     @endif
+                </div>
+            </div>
+
+            <div id="promos" class="tab-content">
+                <h2 class="section-title">// PROMOTIONAL MATRIX: SYSTEM DISCOUNTS</h2>
+                
+                <div class="preview-split-layout" style="margin-bottom: 50px;">
+                    <div class="form-panel cyber-panel-glow">
+                        <form action="{{ route('admin.promos.store') }}" method="POST">
+                            @csrf
+                            <div class="form-group">
+                                <label>PROMO CODE STRING</label>
+                                <input type="text" name="code" class="cyber-input" placeholder="e.g. CYBER26" required style="text-transform: uppercase;">
+                            </div>
+                            <div class="form-group">
+                                <label>DISCOUNT VALUE ($)</label>
+                                <input type="number" step="0.01" name="discount_amount" class="cyber-input" placeholder="e.g. 25.00" required>
+                            </div>
+                            <div class="split-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                <div class="form-group">
+                                    <label>MAXIMUM ALLOWED USES</label>
+                                    <input type="number" name="max_uses" class="cyber-input" value="100" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>EXPIRATION DATE</label>
+                                    <input type="date" name="expires_at" class="cyber-input">
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-top: 25px;">
+                                <button type="submit" class="btn-cyan full-width" style="padding: 18px; font-size: 1.1rem; font-weight: bold; letter-spacing: 2px;">DEPLOY PROMO OVERRIDE</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="live-preview-panel">
+                        <h3 class="preview-label">// ACTIVE DISCOUNT OVERRIDES</h3>
+                        <div class="data-table-wrapper" style="max-height: 400px; overflow-y: auto;">
+                            <table class="cyber-table">
+                                <thead>
+                                    <tr>
+                                        <th>CODE</th>
+                                        <th>VALUE</th>
+                                        <th>USAGE</th>
+                                        <th>STATUS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if(isset($promos) && count($promos) > 0)
+                                        @foreach($promos as $promo)
+                                            <tr>
+                                                <td><strong style="color: var(--neon-cyan);">{{ $promo->code }}</strong></td>
+                                                <td>${{ number_format($promo->discount_amount, 2) }}</td>
+                                                <td>{{ $promo->uses_count }} / {{ $promo->max_uses }}</td>
+                                                <td>
+                                                    @if($promo->expires_at && \Carbon\Carbon::parse($promo->expires_at)->isPast())
+                                                        <span class="badge-pink">EXPIRED</span>
+                                                    @elseif($promo->uses_count >= $promo->max_uses)
+                                                        <span class="stock-yellow">DEPLETED</span>
+                                                    @else
+                                                        <span class="stock-green">ACTIVE</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    @else
+                                        <tr><td colspan="4" style="text-align:center;">NO PROMO CODES ACTIVATED.</td></tr>
+                                    @endif
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
 

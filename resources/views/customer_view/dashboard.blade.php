@@ -1,50 +1,92 @@
-@extends('layouts.master')
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>STEAM // HOME TERMINAL</title>
+    <!-- Add the ?v={{ time() }} right after .css -->
+    <link rel="stylesheet" href="{{ asset('css/customer-dashboard.css') }}?v={{ time() }}">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
 
-@section('content')
-    <div class="dashboard-wrapper">
-        <section class="spotlight-slider-container">
-            <div class="slider-wrapper" id="heroSlider">
-                <div class="slider-slide active" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(7,9,14,1)), url('https://images.unsplash.com/photo-1635805737707-575885ab0820?auto=format&fit=crop&w=1200&q=80')">
-                    <div class="slide-content">
-                        <span class="slide-campaign-tag">// ACTIVE CAMPAIGN: BACK TO SCHOOL DEALS</span>
-                        <h2 class="slide-title">GEAR UP FOR THE TERM</h2>
-                        <p class="slide-desc">Get your student license package. Elevate your tactical skills with premium digital bundles on cooperative catalogs.</p>
-                        <div class="slide-action-row">
-                            <span class="campaign-badge">COOP BUNDLE ACTIVE</span>
-                            <a href="{{ route('customer.catalog') }}" class="btn-slider-action" style="text-decoration:none;">DISCOVER NOW</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="slider-slide" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(7,9,14,1)), url('https://images.unsplash.com/photo-1618336753974-aae8e04506aa?auto=format&fit=crop&w=1200&q=80')">
-                    <div class="slide-content">
-                        <span class="slide-campaign-tag">// WINTER EXCLUSIVE: HOLOGRAPHIC REDUCTION</span>
-                        <h2 class="slide-title">CD DISCS PRICE CRASH</h2>
-                        <p class="slide-desc">All console physical disk ship orders have received a flat price mitigation coupon. Claim your collector CD units.</p>
-                        <div class="slide-action-row">
-                            <span class="campaign-badge">FLAT $12 DELIVERY SAVER</span>
-                            <button class="btn-slider-action" onclick="document.getElementById('cdVaultSection').scrollIntoView({ behavior: 'smooth' });">CD VAULT RELEASES</button>
-                        </div>
-                    </div>
+    <!-- Upper Navigation Terminal -->
+    <nav class="steam-nav">
+        <div class="nav-brand">
+            <span class="logo-accent">STEAM</span> // CLIENT CORE
+        </div>
+        <div class="nav-links">
+            <a href="{{ route('customer.dashboard') }}" class="nav-item active">HOME</a>
+            <a href="{{ route('customer.catalog') }}" class="nav-item">CATALOG</a>
+            <a href="{{ route('profile') }}" class="nav-item">MY PROFILE</a>
+            <a href="{{ route('my.orders') }}" class="nav-item">MY ORDERS</a>
+        </div>
+        <div class="user-status-container">
+            <div class="cart-trigger-container" onclick="toggleWishlistDrawer()">
+                <div class="cart-icon-wrapper" style="border-color: var(--neon-pink); color: var(--neon-pink);">
+                    🤍
+                    <span class="cart-badge-indicator" style="background: var(--neon-pink);" id="wishlistGlobalCount">0</span>
                 </div>
             </div>
+            <div class="cart-trigger-container" onclick="toggleCartDrawer()">
+                <div class="cart-icon-wrapper">
+                    🛒
+                    <span class="cart-badge-indicator" id="cartGlobalCount">0</span>
+                </div>
+                <span class="cart-label">MY BASKET</span>
+            </div>
+            <a href="{{ route('profile') }}"><div class="avatar-glow"></div></a>
+            <div class="user-profile-meta">
+                <span class="user-display-name" id="userDisplayName">{{ Session::get('user_name', 'Operator') }}</span>
+                <span class="wallet-balance">CREDITS: <span class="neon-cyan-text" id="walletBalance">${{ number_format($userCredits ?? 250, 2) }}</span></span>
+            </div>
+            <a href="{{ route('logout') }}" class="btn-logout-cyber">LOGOUT</a>
+        </div>
+    </nav>
+
+    <div class="dashboard-wrapper">
+        
+        <!-- DYNAMIC SEASONAL HERO BANNER SLIDER -->
+        <section class="spotlight-slider-container">
+            <div class="slider-wrapper" id="heroSlider">
+                @foreach($banners as $index => $banner)
+                    <div class="slider-slide {{ $index === 0 ? 'active' : '' }}" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(7,9,14,1)), url('{{ asset('assets/images/banners/' . $banner->image) }}')">
+                        <div class="slide-content">
+                            <span class="slide-campaign-tag">{{ $banner->campaign_tag }}</span>
+                            <h2 class="slide-title">{{ $banner->title }}</h2>
+                            <p class="slide-desc">{{ $banner->description }}</p>
+                            <div class="slide-action-row">
+                                @if($banner->badge_text)
+                                    <span class="campaign-badge">{{ $banner->badge_text }}</span>
+                                @endif
+                                <a href="{{ route('customer.catalog') }}" class="btn-slider-action" style="text-decoration:none;">{{ $banner->button_text }}</a>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
             <div class="slider-controls">
                 <span class="slider-dot active" onclick="setSliderSlide(0)"></span>
                 <span class="slider-dot" onclick="setSliderSlide(1)"></span>
             </div>
         </section>
 
+        <!-- FEATURED ACQUISITIONS (New Section) -->
         <section class="featured-section">
             <div class="catalog-header-bar" style="margin-bottom: 20px;">
                 <h3 class="feed-title">// FEATURED ACQUISITIONS</h3>
                 <a href="{{ route('customer.catalog') }}" class="view-all-link">VIEW ARCHIVE &rarr;</a>
             </div>
+            
             <div class="games-grid">
                 @foreach($featuredGames as $game)
                     <div class="game-card">
                         <div class="card-art-container">
                             <img src="{{ $game['image'] }}" class="card-img-art" alt="{{ $game['title'] }}">
                             <span class="game-thumbnail-label">{{ $game['genre'] }}</span>
-                            <button class="btn-wishlist" onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist({{ $game['id'] }}, this)" data-game-id="{{ $game['id'] }}">馃</button>
+                            <button class="btn-wishlist" onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist({{ $game['id'] }}, this)" data-game-id="{{ $game['id'] }}">🤍</button>
                         </div>
                         <div class="card-details">
                             <div class="card-header-row">
@@ -60,11 +102,13 @@
             </div>
         </section>
 
+        <!-- CD Vault Shelf -->
         <section class="cd-vault-shelf" id="cdVaultSection" style="margin-top: 50px;">
             <div class="vault-header">
                 <h2 class="vault-title">// PS5 & XBOX PHYSICAL CD VAULT</h2>
                 <span class="vault-subtext">HOLOGRAPHIC DISC BOXES WITH SECURE ADDRESS CARGO ROUTING</span>
             </div>
+
             <div class="disc-carousel-grid">
                 @foreach($physicalGames as $pGame)
                     <div class="vault-card">
@@ -79,7 +123,7 @@
                             <span class="console-box-banner {{ str_contains(strtolower($pGame['platform']), 'ps5') ? 'sony-blue' : 'xbox-green' }}">
                                 {{ str_contains(strtolower($pGame['platform']), 'ps5') ? 'PS5 COMPATIBLE' : 'XBOX COMPATIBLE' }}
                             </span>
-                            <button class="btn-wishlist" onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist({{ $pGame['id'] }}, this)" data-game-id="{{ $pGame['id'] }}">馃</button>
+                            <button class="btn-wishlist" onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist({{ $pGame['id'] }}, this)" data-game-id="{{ $pGame['id'] }}">🤍</button>
                         </div>
                         <div class="vault-details">
                             <h4 class="vault-game-title">{{ $pGame['title'] }}</h4>
@@ -95,7 +139,6 @@
                 @endforeach
             </div>
         </section>
-    </div>
 
     <div class="cart-drawer-overlay" id="cartDrawerOverlay" onclick="toggleCartDrawer(); document.getElementById('wishlistDrawer').classList.remove('active');"></div>
     
@@ -154,9 +197,7 @@
             <a href="{{ route('my.orders') }}" class="btn-submit-checkout" style="text-decoration:none; text-align:center;">VIEW IN MY ORDERS</a>
         </div>
     </div>
-@endsection
 
-@section('scripts')
     <script>
         window.userConfig = {
             name: "{{ Session::get('user_name') }}",
@@ -165,5 +206,7 @@
         };
         window.gamesDatabase = @json($games);
     </script>
+    <!-- Add the ?v={{ time() }} right after .js -->
     <script src="{{ asset('js/customer-dashboard.js') }}?v={{ time() }}" defer></script>
-@endsection
+</body>
+</html>
